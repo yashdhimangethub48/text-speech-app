@@ -10,15 +10,24 @@
     <textarea name="text_input" rows="4" cols="50" placeholder="Enter text..."></textarea><br>
     <button type="submit">Convert to MP3</button>
   </form>
+
   {% if mp3_path %}
+    <h3>Preview Speech:</h3>
+    <audio controls>
+      <source src="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
     <p><a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a></p>
   {% endif %}
+
+  <hr>
 
   <h2>Speech to Text</h2>
   <form method="POST" enctype="multipart/form-data">
     <input type="file" name="audio_file" accept=".mp3">
     <button type="submit">Upload and Convert</button>
   </form>
+
   {% if text_result %}
     <h3>Recognized Text:</h3>
     <p>{{ text_result }}</p>
