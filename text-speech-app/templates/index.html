@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Text ↔ Speech App</title>
+</head>
+<body>
+  <h2>Text to Speech</h2>
+  <form method="POST">
+    <textarea name="text_input" rows="4" cols="50" placeholder="Enter text..."></textarea><br>
+    <button type="submit">Convert to MP3</button>
+  </form>
+  {% if mp3_path %}
+    <p><a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a></p>
+  {% endif %}
+
+  <h2>Speech to Text</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="audio_file" accept=".mp3">
+    <button type="submit">Upload and Convert</button>
+  </form>
+  {% if text_result %}
+    <h3>Recognized Text:</h3>
+    <p>{{ text_result }}</p>
+  {% endif %}
+</body>
+</html>
