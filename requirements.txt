@@ -2,3 +2,4 @@ Flask
 gTTS
 SpeechRecognition
 pydub
+gunicorn
