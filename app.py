@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, url_for
 from gtts import gTTS
 import speech_recognition as sr
 from pydub import AudioSegment
@@ -13,10 +13,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def index():
     text_result = ""
     mp3_path = ""
-    
+
     if request.method == "POST":
         if "text_input" in request.form and request.form["text_input"].strip():
-            # Text to MP3
+            # Convert text to speech
             text = request.form["text_input"]
             tts = gTTS(text=text, lang='en')
             filename = f"{uuid.uuid4()}.mp3"
@@ -24,12 +24,13 @@ def index():
             tts.save(mp3_path)
 
         elif "audio_file" in request.files:
-            # MP3 to Text
             file = request.files["audio_file"]
             if file.filename.endswith(".mp3"):
+                # Save MP3
                 mp3_file = os.path.join(UPLOAD_FOLDER, file.filename)
                 file.save(mp3_file)
 
+                # Convert MP3 to WAV
                 wav_file = mp3_file.replace(".mp3", ".wav")
                 AudioSegment.from_mp3(mp3_file).export(wav_file, format="wav")
 
@@ -42,7 +43,7 @@ def index():
                         text_result = "Sorry, could not recognize the speech."
 
                 os.remove(wav_file)
-                os.remove(mp3_file)
+                mp3_path = mp3_file  # For playback
 
     return render_template("index.html", text_result=text_result, mp3_path=mp3_path)
 
