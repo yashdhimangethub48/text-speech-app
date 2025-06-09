@@ -13,24 +13,24 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def index():
     text_result = ""
     mp3_path = ""
+    text_input = ""
 
     if request.method == "POST":
         if "text_input" in request.form and request.form["text_input"].strip():
-            # Convert text to speech
-            text = request.form["text_input"]
-            tts = gTTS(text=text, lang='en')
+            # Text to MP3
+            text_input = request.form["text_input"]
+            tts = gTTS(text=text_input, lang='en')
             filename = f"{uuid.uuid4()}.mp3"
             mp3_path = os.path.join(UPLOAD_FOLDER, filename)
             tts.save(mp3_path)
 
         elif "audio_file" in request.files:
+            # MP3 to Text
             file = request.files["audio_file"]
             if file.filename.endswith(".mp3"):
-                # Save MP3
                 mp3_file = os.path.join(UPLOAD_FOLDER, file.filename)
                 file.save(mp3_file)
 
-                # Convert MP3 to WAV
                 wav_file = mp3_file.replace(".mp3", ".wav")
                 AudioSegment.from_mp3(mp3_file).export(wav_file, format="wav")
 
@@ -43,9 +43,10 @@ def index():
                         text_result = "Sorry, could not recognize the speech."
 
                 os.remove(wav_file)
-                mp3_path = mp3_file  # For playback
+                os.remove(mp3_file)
 
-    return render_template("index.html", text_result=text_result, mp3_path=mp3_path)
+    return render_template("index.html", text_result=text_result, mp3_path=mp3_path, text_input=text_input)
+
 
 @app.route("/download/<filename>")
 def download(filename):
