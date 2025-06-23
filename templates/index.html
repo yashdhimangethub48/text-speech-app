@@ -1,37 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Text ↔ Speech App</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    textarea { width: 100%; max-width: 500px; }
+    audio { margin-top: 10px; display: block; }
+  </style>
 </head>
 <body>
   <h2>Text to Speech</h2>
   <form method="POST">
-    <textarea name="text_input" rows="4" cols="50" placeholder="Enter text...">{{ text_input }}</textarea><br>
+    <textarea name="text_input" rows="4" placeholder="Enter text...">{{ text_input }}</textarea><br>
     <label>Select Language:</label>
     <select name="language">
-      <option value="en" {% if selected_lang == 'en' %}selected{% endif %}>English</option>
-      <option value="hi" {% if selected_lang == 'hi' %}selected{% endif %}>Hindi</option>
+      <option value="en" {% if lang_code == 'en' %}selected{% endif %}>English</option>
+      <option value="hi" {% if lang_code == 'hi' %}selected{% endif %}>Hindi</option>
     </select><br><br>
-    <button type="submit">Convert to MP3</button>
+    <button type="submit">Convert to Speech</button>
   </form>
+
   {% if mp3_path %}
     <audio controls>
       <source src="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}" type="audio/mpeg">
-      Your browser does not support the audio element.
-    </audio><br>
+    </audio>
     <a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a>
   {% endif %}
 
-  <h2>Speech to Text</h2>
+  <hr>
+
+  <h2>Upload MP3 to Convert to Text</h2>
   <form method="POST" enctype="multipart/form-data">
     <input type="file" name="audio_file" accept=".mp3">
-    <input type="hidden" name="language" value="{{ selected_lang }}">
-    <button type="submit">Upload and Convert</button>
+    <select name="language">
+      <option value="en" {% if lang_code == 'en' %}selected{% endif %}>English</option>
+      <option value="hi" {% if lang_code == 'hi' %}selected{% endif %}>Hindi</option>
+    </select>
+    <button type="submit">Upload & Convert</button>
   </form>
+
   {% if text_result %}
     <h3>Recognized Text:</h3>
     <p>{{ text_result }}</p>
   {% endif %}
+
+  <hr>
+
+  <h2>Record Voice (Real-Time)</h2>
+  <button onclick="startRecording()">Start Recording</button>
+  <button onclick="stopRecording()">Stop</button>
+  <p id="liveText">Recognized: ...</p>
+
+  <script>
+    let recognition;
+    function startRecording() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('Speech Recognition not supported in your browser.');
+        return;
+      }
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = "{{ lang_code }}-IN";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = function(event) {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        document.getElementById("liveText").innerText = "Recognized: " + transcript;
+      };
+
+      recognition.start();
+    }
+
+    function stopRecording() {
+      if (recognition) recognition.stop();
+    }
+  </script>
 </body>
 </html>
