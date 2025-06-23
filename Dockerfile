@@ -1,13 +1,20 @@
-FROM python:3.11-slim
+# Use Python base image
+FROM python:3.10-slim
 
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# Install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
 
+# Set workdir
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+# Copy files
 COPY . .
 
-EXPOSE 5000
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000"]
+# Install dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Expose port
+EXPOSE 10000
+
+# Run the app
+CMD ["gunicorn", "-b", "0.0.0.0:10000", "app:app"]
