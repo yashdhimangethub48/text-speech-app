@@ -1,9 +1,9 @@
 import os
+import uuid
 from flask import Flask, request, render_template, send_file
 from gtts import gTTS
 import speech_recognition as sr
 from pydub import AudioSegment
-import uuid
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -14,14 +14,12 @@ def index():
     text_result = ""
     mp3_path = ""
     text_input = ""
-    lang_code = "en"  # default
+    selected_lang = request.form.get("language", "en")
 
     if request.method == "POST":
-        lang_code = request.form.get("language", "en")
-
         if "text_input" in request.form and request.form["text_input"].strip():
             text_input = request.form["text_input"]
-            tts = gTTS(text=text_input, lang=lang_code)
+            tts = gTTS(text=text_input, lang=selected_lang)
             filename = f"{uuid.uuid4()}.mp3"
             mp3_path = os.path.join(UPLOAD_FOLDER, filename)
             tts.save(mp3_path)
@@ -39,14 +37,14 @@ def index():
                 with sr.AudioFile(wav_file) as source:
                     audio_data = recognizer.record(source)
                     try:
-                        text_result = recognizer.recognize_google(audio_data, language=lang_code + "-IN")
+                        text_result = recognizer.recognize_google(audio_data, language=selected_lang)
                     except:
                         text_result = "Sorry, could not recognize the speech."
 
                 os.remove(wav_file)
                 os.remove(mp3_file)
 
-    return render_template("index.html", text_result=text_result, mp3_path=mp3_path, text_input=text_input, lang_code=lang_code)
+    return render_template("index.html", text_result=text_result, mp3_path=mp3_path, text_input=text_input, selected_lang=selected_lang)
 
 @app.route("/download/<filename>")
 def download(filename):
