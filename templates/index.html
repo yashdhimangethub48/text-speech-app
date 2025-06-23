@@ -3,33 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <title>Text ↔ Speech App</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    textarea { width: 100%; height: 100px; }
-    audio { margin-top: 10px; display: block; }
-  </style>
 </head>
 <body>
   <h2>Text to Speech</h2>
   <form method="POST">
-    <textarea name="text_input" placeholder="Enter text...">{{ text_input }}</textarea><br>
-    <label for="language">Select Language:</label>
-    <select name="language">
-      <option value="en">English</option>
+    <textarea name="text_input" rows="4" cols="50" placeholder="Enter text...">{{ text_input }}</textarea><br>
+    <select name="lang">
+      <option value="en" selected>English</option>
       <option value="hi">Hindi</option>
     </select><br><br>
     <button type="submit">Convert to MP3</button>
   </form>
   {% if mp3_path %}
     <audio controls>
-      <source src="{{ url_for('static', filename='uploads/' + mp3_path.split('/')[-1]) }}" type="audio/mpeg">
+      <source src="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}" type="audio/mp3">
+      Your browser does not support the audio element.
     </audio>
-    <a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a>
+    <p><a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a></p>
   {% endif %}
 
   <h2>Speech to Text</h2>
   <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="audio_file" accept=".mp3" required>
+    <input type="file" name="audio_file" accept=".mp3"><br>
+    <select name="lang">
+      <option value="en-US" selected>English</option>
+      <option value="hi-IN">Hindi</option>
+    </select><br><br>
     <button type="submit">Upload and Convert</button>
   </form>
   {% if text_result %}
