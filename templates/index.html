@@ -4,116 +4,37 @@
   <meta charset="UTF-8" />
   <title>Text ↔ Speech App</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      background: #f8f9fa;
-    }
-    h2 {
-      color: #343a40;
-    }
-    textarea {
-      width: 100%;
-      height: 100px;
-      margin-bottom: 10px;
-      padding: 10px;
-    }
-    button, select {
-      padding: 10px 15px;
-      margin-right: 10px;
-    }
-    audio {
-      display: block;
-      margin-top: 10px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 100px; }
+    audio { margin-top: 10px; display: block; }
   </style>
 </head>
 <body>
-
   <h2>Text to Speech</h2>
-  <form method="POST" enctype="multipart/form-data">
-    <textarea name="text_input" id="text_input" placeholder="Enter text...">{{ text_input }}</textarea>
-    
-    <br>
-    <label for="lang">Select Language:</label>
-    <select name="lang" id="lang">
-      <option value="en" {% if selected_lang == 'en' %}selected{% endif %}>English</option>
-      <option value="hi" {% if selected_lang == 'hi' %}selected{% endif %}>Hindi</option>
-    </select>
-
+  <form method="POST">
+    <textarea name="text_input" placeholder="Enter text...">{{ text_input }}</textarea><br>
+    <label for="language">Select Language:</label>
+    <select name="language">
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+    </select><br><br>
     <button type="submit">Convert to MP3</button>
   </form>
-
   {% if mp3_path %}
     <audio controls>
-      <source src="{{ url_for('static', filename=mp3_path) }}" type="audio/mpeg">
-      Your browser does not support the audio element.
+      <source src="{{ url_for('static', filename='uploads/' + mp3_path.split('/')[-1]) }}" type="audio/mpeg">
     </audio>
-    <p><a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a></p>
+    <a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a>
   {% endif %}
 
-  <h2>Speech to Text (Upload MP3)</h2>
+  <h2>Speech to Text</h2>
   <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="audio_file" accept=".mp3">
+    <input type="file" name="audio_file" accept=".mp3" required>
     <button type="submit">Upload and Convert</button>
   </form>
-
   {% if text_result %}
     <h3>Recognized Text:</h3>
     <p>{{ text_result }}</p>
   {% endif %}
-
-  <h2>🎙️ Real-Time Voice to Text</h2>
-  <button onclick="startRecording()">Start Recording</button>
-  <button onclick="stopRecording()">Stop</button>
-  <p id="status"></p>
-
-  <script>
-    let recognition;
-    function startRecording() {
-      const textarea = document.getElementById("text_input");
-      const status = document.getElementById("status");
-
-      if (!('webkitSpeechRecognition' in window)) {
-        alert("Sorry, your browser doesn't support speech recognition.");
-        return;
-      }
-
-      recognition = new webkitSpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = document.getElementById("lang").value;
-
-      recognition.onstart = function() {
-        status.innerText = "🎤 Listening...";
-      };
-
-      recognition.onresult = function(event) {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        textarea.value = transcript;
-      };
-
-      recognition.onerror = function(event) {
-        status.innerText = "Error occurred in recognition: " + event.error;
-      };
-
-      recognition.onend = function() {
-        status.innerText = "Stopped.";
-      };
-
-      recognition.start();
-    }
-
-    function stopRecording() {
-      if (recognition) {
-        recognition.stop();
-        document.getElementById("status").innerText = "Recording stopped.";
-      }
-    }
-  </script>
-
 </body>
 </html>
