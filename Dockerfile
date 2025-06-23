@@ -1,20 +1,19 @@
-# Use Python base image
 FROM python:3.10-slim
 
-# Install ffmpeg
+# Install dependencies including ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg
 
-# Set workdir
+# Set working directory
 WORKDIR /app
 
-# Copy files
+# Copy app files
 COPY . .
 
-# Install dependencies
+# Install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Expose port
+# Expose port for Render
 EXPOSE 10000
 
-# Run the app
+# Run with gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:10000", "app:app"]
