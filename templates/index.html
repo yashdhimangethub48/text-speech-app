@@ -3,34 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <title>Text ↔ Speech App</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    textarea { width: 100%; padding: 10px; margin-bottom: 10px; }
+    select, button, input[type="file"] { margin-top: 10px; padding: 6px; }
+    audio { width: 100%; margin-top: 10px; }
+  </style>
 </head>
 <body>
   <h2>Text to Speech</h2>
   <form method="POST">
-    <textarea name="text_input" rows="4" cols="50" placeholder="Enter text...">{{ text_input }}</textarea><br>
-    <select name="lang">
-      <option value="en" selected>English</option>
-      <option value="hi">Hindi</option>
+    <label for="lang">Select Language:</label>
+    <select name="lang" id="lang">
+      <option value="en" {% if selected_lang == 'en' %}selected{% endif %}>English</option>
+      <option value="hi" {% if selected_lang == 'hi' %}selected{% endif %}>Hindi</option>
     </select><br><br>
-    <button type="submit">Convert to MP3</button>
+    
+    <textarea name="text_input" rows="5" placeholder="Enter text...">{{ text_input }}</textarea><br>
+    <button type="submit">Convert to Speech</button>
   </form>
+
   {% if mp3_path %}
-    <audio controls>
-      <source src="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}" type="audio/mp3">
+    <p><a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a></p>
+    <audio controls preload="auto">
+      <source src="{{ url_for('static', filename='uploads/' + mp3_path.split('/')[-1]) }}" type="audio/mpeg">
       Your browser does not support the audio element.
     </audio>
-    <p><a href="{{ url_for('download', filename=mp3_path.split('/')[-1]) }}">Download MP3</a></p>
   {% endif %}
 
+  <hr>
   <h2>Speech to Text</h2>
   <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="audio_file" accept=".mp3"><br>
-    <select name="lang">
-      <option value="en-US" selected>English</option>
-      <option value="hi-IN">Hindi</option>
+    <label for="lang">Select Language:</label>
+    <select name="lang" id="lang">
+      <option value="en" {% if selected_lang == 'en' %}selected{% endif %}>English</option>
+      <option value="hi" {% if selected_lang == 'hi' %}selected{% endif %}>Hindi</option>
     </select><br><br>
-    <button type="submit">Upload and Convert</button>
+    
+    <input type="file" name="audio_file" accept=".mp3"><br>
+    <button type="submit">Upload and Convert to Text</button>
   </form>
+
   {% if text_result %}
     <h3>Recognized Text:</h3>
     <p>{{ text_result }}</p>
